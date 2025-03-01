@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<PlatformFile> _selectedFiles = [];
   List<String> _fileUrls = [];
   final supabase = Supabase.instance.client;
-  static const int _maxFileSize = 1024 * 1024; // 1MB in bytes
+  static const int _maxTotalFileSize = 4 * 1024 * 1024; // 4MB in bytes
   bool _isUploading = false;
   Map<String, double> _uploadProgress = {}; // Track upload progress for each file
 
@@ -30,30 +30,25 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'txt'], // Allow only printable file types
         withData: true,
       );
 
       if (result != null) {
-        // Filter out files larger than 1MB
-        final validFiles = result.files.where((file) => file.size <= _maxFileSize).toList();
+        // Calculate total size of selected files
+        final totalSize = result.files.fold<int>(0, (sum, file) => sum + file.size);
 
-        if (validFiles.isEmpty) {
+        // Check if total size exceeds the 4MB limit
+        if (totalSize > _maxTotalFileSize) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("All files exceed the 1MB size limit")),
+            const SnackBar(content: Text("Total file size exceeds the 4MB limit")),
           );
           return;
         }
 
-        // Show warning if some files were skipped
-        if (validFiles.length < result.files.length) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Some files were skipped as they exceed 1MB")),
-          );
-        }
-
         // Filter out duplicate files
-        final newFiles = validFiles.where((file) => !_selectedFiles.any((f) => f.name == file.name)).toList();
+        final newFiles = result.files.where((file) => !_selectedFiles.any((f) => f.name == file.name)).toList();
 
         if (newFiles.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -107,14 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // Upload the file with overwrite mode enabled
       await supabase.storage
-          .from('print_documents')
+          .from('Print Documents')
           .upload(
             fileName,
             file,
             fileOptions: FileOptions(upsert: true), // Enable overwrite mode
           );
 
-      String fileUrl = supabase.storage.from('print_documents').getPublicUrl(fileName);
+      String fileUrl = supabase.storage.from('Print Documents').getPublicUrl(fileName);
 
       // Update UI with file URL
       setState(() {
