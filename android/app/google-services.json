@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89963148786",
+    "project_id": "printapp-db6c9",
+    "storage_bucket": "printapp-db6c9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89963148786:android:e49c8ba308675ea047676b",
+        "android_client_info": {
+          "package_name": "com.example.t_store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB7CtSXTveZDHZdMRNwoBxpZKu3P3DNuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
