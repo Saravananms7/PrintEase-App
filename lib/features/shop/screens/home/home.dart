@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
         type: FileType.any,
         withData: true,
       );
-//testing
+
       if (result != null) {
         // Filter out files larger than 1MB
         final validFiles = result.files.where((file) => file.size <= _maxFileSize).toList();
