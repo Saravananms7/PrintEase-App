@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # t_store
 
 A new Flutter project.
@@ -44,3 +45,6 @@ A new Flutter project.
 |       You're primed and ready to launch the application upon successful completion.               |
 |                                                                                                  |
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+=======
+# PrintEase-App
+>>>>>>> 6abd152356c96f055cd5a25a41a4cb856eb6f245
