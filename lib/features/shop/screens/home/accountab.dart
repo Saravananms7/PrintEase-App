@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:t_store/features/authentication/screens/login/login.dart';
 import 'package:t_store/utils/constants/colors.dart';
 import 'package:t_store/utils/constants/sizes.dart';
 
@@ -8,6 +11,14 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAll(() => const LoginScreen());
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Account"),
@@ -19,7 +30,7 @@ class AccountScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profile Section
-            _buildProfileCard(),
+            _buildProfileCard(user),
 
             const SizedBox(height: TSizes.spaceBtwSections),
 
@@ -42,7 +53,7 @@ class AccountScreen extends StatelessWidget {
   }
 
   // 🔹 Profile Card UI
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(User user) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -59,16 +70,20 @@ class AccountScreen extends StatelessWidget {
             const SizedBox(width: TSizes.spaceBtwItems),
 
             // User Info
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  currentUser.name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(currentUser.email, style: TextStyle(color: Colors.grey.shade600)),
-                Text(currentUser.college, style: TextStyle(color: Colors.grey.shade600)),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.userMetadata?['full_name'] ?? 'No Name',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    user.email ?? 'No Email',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -147,9 +162,10 @@ class AccountScreen extends StatelessWidget {
             child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              // TODO: Implement logout logic
-              Navigator.pop(context);
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              if (context.mounted) Navigator.pop(context);
+              Get.offAll(() => const LoginScreen());
             },
             child: const Text("Logout"),
           ),
@@ -158,22 +174,3 @@ class AccountScreen extends StatelessWidget {
     );
   }
 }
-
-// User Model
-class User {
-  final String name;
-  final String email;
-  final String college;
-
-  User({
-    required this.name,
-    required this.email,
-    required this.college,
-  });
-}
-
-final User currentUser = User(
-  name: "Saravanan",
-  email: "saravanan@example.com",
-  college: "MIT College",
-);

@@ -106,8 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Please login to upload files")),
         );
-        // Optionally navigate to login screen
-        // Get.to(() => const LoginScreen());
         return;
       }
 
@@ -145,22 +143,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _removeFile(int index) async {
     try {
       final user = supabase.auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please login to remove files")),
+        );
+        return;
+      }
 
       // Get the file URL that needs to be removed
       final fileUrl = _fileUrls[index];
-      
-      // Extract the file path from URL
+
+      // Extract the file path from the URL
       final uri = Uri.parse(fileUrl);
       final pathSegments = uri.pathSegments;
       final filePath = pathSegments.sublist(pathSegments.indexOf('public')).join('/');
 
-      // Remove from Supabase storage
+      // Remove the file from Supabase Storage
       await supabase.storage
-          .from('Print Documents')
+          .from('Print Documents') // Replace with your bucket name
           .remove([filePath]);
 
-      // Remove from local state
+      // Remove the file from local state
       setState(() {
         _selectedFiles.removeAt(index);
         _fileUrls.removeAt(index);
@@ -173,6 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error removing file: $e")),
       );
+      print("Error removing file: $e");
     }
   }
 

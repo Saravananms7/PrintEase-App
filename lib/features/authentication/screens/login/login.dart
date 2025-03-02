@@ -18,6 +18,16 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is already logged in
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser != null) {
+      // If logged in, redirect to home page
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAll(() => const NavigationMenu());
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -88,7 +98,6 @@ class TLoginForm extends StatefulWidget {
 
 class _TLoginFormState extends State<TLoginForm> {
   bool _obscureText = true;
-  bool _rememberMe = false;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -186,25 +195,10 @@ class _TLoginFormState extends State<TLoginForm> {
             ),
             const SizedBox(height: TSizes.spaceBtwInputFields / 2),
 
-            /// Remember Me & Forget Password
+            /// Forget Password
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                /// Remember Me Checkbox
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _rememberMe = value!;
-                        });
-                      },
-                    ),
-                    const Text(TTexts.rememberMe),
-                  ],
-                ),
-
                 /// Forget Password Button
                 TextButton(
                   onPressed: () => Get.to(() => const ForgetPassword()),
