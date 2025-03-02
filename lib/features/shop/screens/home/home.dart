@@ -6,6 +6,8 @@ import 'package:t_store/utils/constants/sizes.dart';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as path;
+import 'package:get/get.dart';
+import 'package:t_store/features/shop/screens/payment/payment_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -195,12 +197,19 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    print("Print Type: $_printType");
-    print("Color Mode: $_colorMode");
-    print("Copies: $_copies");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Print request submitted!")),
-    );
+    // Calculate total amount (example calculation)
+    double basePrice = _colorMode == 'bw' ? 2.0 : 5.0;  // Price per page
+    if (_printType == 'double') basePrice *= 1.5;  // 50% more for double-sided
+    double totalAmount = basePrice * _copies * _selectedFiles.length;
+
+    // Navigate to payment screen
+    Get.to(() => PaymentScreen(
+      amount: totalAmount,
+      fileNames: _selectedFiles.map((file) => file.name).toList(),
+      printType: _printType,
+      colorMode: _colorMode,
+      copies: _copies,
+    ));
   }
 
   @override
@@ -234,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 10),
                     Center(
                       child: ElevatedButton.icon(
-                        icon: const Icon(Iconsax.document_upload),
+                        icon: const Icon(Iconsax.document_upload, color: Colors.white),
                         label: const Text("Choose Files"),
                         onPressed: _isUploading ? null : _pickFiles,
                         style: ElevatedButton.styleFrom(
@@ -372,8 +381,8 @@ class _HomeScreenState extends State<HomeScreen> {
             // Submit Button
             Center(
               child: ElevatedButton.icon(
-                icon: const Icon(Iconsax.printer),
-                label: const Text("Submit Print Request"),
+                icon: const Icon(Iconsax.money, color: Colors.white),
+                label: const Text("Proceed to Pay"),
                 onPressed: _isUploading ? null : _submitPrintRequest,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
