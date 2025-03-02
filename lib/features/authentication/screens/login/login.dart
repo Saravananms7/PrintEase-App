@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:t_store/common/styles/spacing_styles.dart';
-import 'package:t_store/common/widgets/login_signup/form_divider.dart';
-import 'package:t_store/common/widgets/login_signup/social_buttons.dart';
 import 'package:t_store/features/authentication/screens/password_config/forget_pass.dart';
 import 'package:t_store/features/authentication/screens/signup/signup.dart';
 import 'package:t_store/navigation_menu.dart';
@@ -40,13 +38,6 @@ class LoginScreen extends StatelessWidget {
 
                 /// Login Form
                 const TLoginForm(),
-
-                /// Divider
-                TFormDivider(dividerText: TTexts.orSignInWith.capitalize!),
-                const SizedBox(height: TSizes.spaceBtwSections),
-
-                /// Social Buttons
-                const TSocialButtons(),
               ],
             ),
           ),

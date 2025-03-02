@@ -5,17 +5,22 @@ import 'package:t_store/utils/constants/text_strings.dart';
 import 'package:t_store/utils/helpers/helper_functions.dart';
 
 class TTandC extends StatelessWidget {
+  final Function(bool) onChanged;
+
   const TTandC({
     super.key,
+    required this.onChanged,
   });
-
 
   @override
   Widget build(BuildContext context) {
     final dark= THelperFunctions.isDarkMode(context);
     return Row(
       children: [
-        SizedBox(width: 24, height: 24, child: Checkbox (value: true, onChanged: (value) {})),
+        SizedBox(width: 24, height: 24, child: Checkbox(
+          value: false,
+          onChanged: (value) => onChanged(value ?? false),
+        )),
         const SizedBox(width: TSizes.spaceBtwItems),
         Text.rich(
           TextSpan(children: [

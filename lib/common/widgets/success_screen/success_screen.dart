@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:t_store/common/styles/spacing_styles.dart';
 import 'package:t_store/utils/constants/sizes.dart';
@@ -41,3 +42,4 @@ class SuccessScreen extends StatelessWidget {
     );
   }
 }
+
