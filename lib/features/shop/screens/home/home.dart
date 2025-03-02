@@ -100,18 +100,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _uploadFile(File file, String fileName) async {
     try {
-      // Upload the file with overwrite mode enabled
+      // Check if user is authenticated
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please login to upload files")),
+        );
+        // Optionally navigate to login screen
+        // Get.to(() => const LoginScreen());
+        return;
+      }
+
+      // Upload to bucket
       await supabase.storage
           .from('Print Documents')
           .upload(
-            fileName,
+            'public/${user.id}/$fileName',  // Add user ID to path for better organization
             file,
-            fileOptions: FileOptions(upsert: true), // Enable overwrite mode
+            fileOptions: FileOptions(
+              upsert: true,
+              contentType: 'application/pdf',
+            ),
           );
 
-      String fileUrl = supabase.storage.from('Print Documents').getPublicUrl(fileName);
+      String fileUrl = supabase.storage
+          .from('Print Documents')
+          .getPublicUrl('public/${user.id}/$fileName');
 
-      // Update UI with file URL
       setState(() {
         _fileUrls.add(fileUrl);
       });
@@ -121,9 +136,43 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Upload failed. Please try again.")),
+        SnackBar(content: Text("Upload failed: $e")),
       );
       print("Upload failed: $e");
+    }
+  }
+
+  Future<void> _removeFile(int index) async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      // Get the file URL that needs to be removed
+      final fileUrl = _fileUrls[index];
+      
+      // Extract the file path from URL
+      final uri = Uri.parse(fileUrl);
+      final pathSegments = uri.pathSegments;
+      final filePath = pathSegments.sublist(pathSegments.indexOf('public')).join('/');
+
+      // Remove from Supabase storage
+      await supabase.storage
+          .from('Print Documents')
+          .remove([filePath]);
+
+      // Remove from local state
+      setState(() {
+        _selectedFiles.removeAt(index);
+        _fileUrls.removeAt(index);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("File removed successfully")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error removing file: $e")),
+      );
     }
   }
 
@@ -206,19 +255,31 @@ class _HomeScreenState extends State<HomeScreen> {
                               final progress = _uploadProgress[_generateUniqueFileName(file.name)] ?? 0.0;
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 2),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
                                   children: [
-                                    Text(
-                                      "${index + 1}. ${file.name}",
-                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                    ),
-                                    if (_isUploading)
-                                      LinearProgressIndicator(
-                                        value: progress / 100,
-                                        backgroundColor: Colors.grey[300],
-                                        valueColor: const AlwaysStoppedAnimation<Color>(TColors.primary),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "${index + 1}. ${file.name}",
+                                            style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                          ),
+                                          if (_isUploading)
+                                            LinearProgressIndicator(
+                                              value: progress / 100,
+                                              backgroundColor: Colors.grey[300],
+                                              valueColor: const AlwaysStoppedAnimation<Color>(TColors.primary),
+                                            ),
+                                        ],
                                       ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                                      onPressed: _isUploading ? null : () => _removeFile(index),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
                                   ],
                                 ),
                               );
