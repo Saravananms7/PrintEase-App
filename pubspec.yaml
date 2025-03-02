@@ -45,6 +45,13 @@ dependencies:
   # Database
   supabase_flutter: ^2.3.4
 
+  path_provider: ^2.1.1
+
+  # New dependencies
+  pdf_render: ^1.4.2
+  syncfusion_flutter_pdf: ^24.1.41
+
+
 
 
   #--------------- ./ PACKAGES END ------------------#
